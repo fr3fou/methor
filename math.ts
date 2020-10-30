@@ -1,6 +1,7 @@
 import {
   bind,
   digit,
+  either,
   many,
   Parser,
   result,
@@ -28,7 +29,13 @@ class Integer implements Expression {
 type Operator = "+" | "-" | "*" | "/";
 
 export function integerParser(): Parser<Integer> {
-  return bind(many(digit()), (v) => {
-    return result(new Integer(Number(v.join(""))));
-  });
+  return bind(many(digit()), (v) => result(new Integer(Number(v.join("")))));
+}
+
+export function infixParser(): Parser<InfixExpression> {
+  return result(new InfixExpression("+", new Integer(4), new Integer(3)));
+}
+
+export function expressionParser(): Parser<Expression> {
+  return either(integerParser(), infixParser());
 }
