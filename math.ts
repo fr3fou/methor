@@ -1,3 +1,11 @@
+import {
+  bind,
+  digit,
+  many,
+  Parser,
+  result,
+} from "https://raw.githubusercontent.com/fr3fou/djena/master/parse.ts";
+
 interface Expression {
   expressionNode(): void;
 }
@@ -18,3 +26,9 @@ class Integer implements Expression {
 }
 
 type Operator = "+" | "-" | "*" | "/";
+
+export function integerParser(): Parser<Integer> {
+  return bind(many(digit()), (v) => {
+    return result(new Integer(Number(v.join(""))));
+  });
+}
