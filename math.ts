@@ -28,6 +28,18 @@ class Integer implements Expression {
 
 type Operator = "+" | "-" | "*" | "/";
 
+enum Precedence {
+  Sum = 1,
+  Product = 2,
+}
+
+const precedences: { [key in Operator]: Precedence } = {
+  "+": Precedence.Sum,
+  "-": Precedence.Sum,
+  "/": Precedence.Product,
+  "*": Precedence.Product,
+};
+
 export function integerParser(): Parser<Integer> {
   return bind(many(digit()), (v) => result(new Integer(Number(v.join("")))));
 }
