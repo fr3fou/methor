@@ -1,8 +1,8 @@
-import { integerParser } from "./math.ts";
+import { expressionParser } from "./math.ts";
 
 function main() {
-  const p = integerParser();
-  console.log(p("20"));
+  const p = expressionParser();
+  console.log(p("5+5+3+6"));
 }
 
 main();

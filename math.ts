@@ -1,10 +1,12 @@
 import {
   bind,
+  charP,
   digit,
   either,
   many,
   Parser,
   result,
+  whitespace,
 } from "https://raw.githubusercontent.com/fr3fou/djena/master/parse.ts";
 
 interface Expression {
@@ -29,6 +31,7 @@ class Integer implements Expression {
 type Operator = "+" | "-" | "*" | "/";
 
 enum Precedence {
+  Lowest = 0,
   Sum = 1,
   Product = 2,
 }
@@ -44,10 +47,27 @@ export function integerParser(): Parser<Integer> {
   return bind(many(digit()), (v) => result(new Integer(Number(v.join("")))));
 }
 
-export function infixParser(): Parser<InfixExpression> {
-  return result(new InfixExpression("+", new Integer(4), new Integer(3)));
+export function operatorParser(): Parser<Operator> {
+  return either(
+    charP("+"),
+    either(charP("-"), either(charP("*"), charP("/")))
+  ) as Parser<Operator>;
+}
+
+export function infixParser(prec: Precedence): Parser<InfixExpression> {
+  return bind(expressionParser(), (lhs) =>
+    bind(whitespace(), (_) =>
+      bind(operatorParser(), (op) =>
+        bind(whitespace(), (_) =>
+          bind(expressionParser(), (rhs) =>
+            result(new InfixExpression(op, lhs, rhs))
+          )
+        )
+      )
+    )
+  );
 }
 
 export function expressionParser(): Parser<Expression> {
-  return either(integerParser(), infixParser());
+  return either(integerParser(), infixParser(Precedence.Lowest));
 }
