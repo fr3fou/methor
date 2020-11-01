@@ -29,7 +29,7 @@ class Integer implements Expression {
 
 type Operator = "+" | "-" | "*" | "/";
 
-enum Precedence {
+export const enum Precedence {
   Lowest = 0,
   Sum = 1,
   Product = 2,
@@ -55,13 +55,28 @@ export function operator(): Parser<Operator> {
 
 export function infixExpression(lhs: Expression): Parser<InfixExpression> {
   return bind(operator(), (op) =>
-    bind(expression(), (rhs) => result(new InfixExpression(op, lhs, rhs)))
+    bind(expression(precedences[op]), (rhs) =>
+      result(new InfixExpression(op, lhs, rhs))
+    )
   );
 }
 
-export function expression(): Parser<Expression> {
+export function expression(curr: Precedence): Parser<Expression> {
   return either(
-    bind(integer(), (lhs) => infixExpression(lhs)),
+    bind(integer(), (lhs) => {
+      return (input: string): [Expression, string][] => {
+        const op = operator();
+        const out = op(input);
+        if (out.length === 0) {
+          return [];
+        }
+        if (curr < precedences[out[0][0]]) {
+          return infixExpression(lhs)(input);
+        }
+
+        return [[lhs, input]];
+      };
+    }),
     integer()
   );
 }
