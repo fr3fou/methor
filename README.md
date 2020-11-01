@@ -8,3 +8,6 @@ A simple math parser and evaluator
 - [ ] Floats
 - [ ] Negative numbers
 - [ ] Grouped expressions
+- [ ] Builtin math funcs
+- [ ] REPL
+- [ ] Evaluation
