@@ -9,5 +9,7 @@ A simple math parser and evaluator
 - [ ] Negative numbers
 - [ ] Grouped expressions
 - [ ] Builtin math funcs
+- [ ] More operators
 - [ ] REPL
 - [ ] Evaluation
+- [ ] Binary operators
