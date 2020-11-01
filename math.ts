@@ -6,7 +6,6 @@ import {
   many,
   Parser,
   result,
-  whitespace,
 } from "https://raw.githubusercontent.com/fr3fou/djena/master/parse.ts";
 
 interface Expression {
@@ -43,31 +42,26 @@ const precedences: { [key in Operator]: Precedence } = {
   "*": Precedence.Product,
 };
 
-export function integerParser(): Parser<Integer> {
+export function integer(): Parser<Integer> {
   return bind(many(digit()), (v) => result(new Integer(Number(v.join("")))));
 }
 
-export function operatorParser(): Parser<Operator> {
+export function operator(): Parser<Operator> {
   return either(
     charP("+"),
     either(charP("-"), either(charP("*"), charP("/")))
   ) as Parser<Operator>;
 }
 
-export function infixParser(prec: Precedence): Parser<InfixExpression> {
-  return bind(expressionParser(), (lhs) =>
-    bind(whitespace(), (_) =>
-      bind(operatorParser(), (op) =>
-        bind(whitespace(), (_) =>
-          bind(expressionParser(), (rhs) =>
-            result(new InfixExpression(op, lhs, rhs))
-          )
-        )
-      )
-    )
+export function infixExpression(lhs: Expression): Parser<InfixExpression> {
+  return bind(operator(), (op) =>
+    bind(expression(), (rhs) => result(new InfixExpression(op, lhs, rhs)))
   );
 }
 
-export function expressionParser(): Parser<Expression> {
-  return either(integerParser(), infixParser(Precedence.Lowest));
+export function expression(): Parser<Expression> {
+  return either(
+    bind(integer(), (lhs) => infixExpression(lhs)),
+    integer()
+  );
 }
