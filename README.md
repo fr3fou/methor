@@ -13,5 +13,5 @@ A simple math parser and evaluator
 - [ ] Builtin math funcs
 - [ ] More operators
 - [ ] REPL
-- [ ] Evaluation
+- [x] Evaluation
 - [ ] Binary operators
