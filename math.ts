@@ -6,6 +6,7 @@ import {
   many,
   Parser,
   result,
+  stringP,
   whitespace,
 } from "https://raw.githubusercontent.com/fr3fou/djena/master/parse.ts";
 
@@ -23,12 +24,23 @@ class InfixExpression implements Expression {
   expressionNode() {}
 }
 
+class FunctionInvocationExpression implements Expression {
+  constructor(readonly name: Fn, readonly arg: Expression) {}
+  expressionNode(): void {}
+}
+
 class Integer implements Expression {
   constructor(readonly value: number) {}
   expressionNode(): void {}
 }
 
 type Operator = "+" | "-" | "*" | "/";
+type Fn = "sin" | "cos" | "abs";
+const fns: { [key in Fn]: (n: number) => number } = {
+  sin: Math.sin,
+  cos: Math.cos,
+  abs: Math.abs,
+};
 
 function integer(): Parser<Integer> {
   return bind(
@@ -40,6 +52,24 @@ function integer(): Parser<Integer> {
   );
 }
 
+function fn(): Parser<FunctionInvocationExpression> {
+  return bind(
+    either(stringP("sin"), either(stringP("cos"), stringP("abs"))) as Parser<
+      Fn
+    >,
+    (name) =>
+      bind(whitespace(), (_) =>
+        bind(charP("("), (_) =>
+          bind(sum(), (exp) =>
+            bind(charP(")"), (_) =>
+              result(new FunctionInvocationExpression(name, exp))
+            )
+          )
+        )
+      )
+  );
+}
+
 function terminal(): Parser<Expression> {
   return bind(whitespace(), (_) =>
     bind(
@@ -47,7 +77,7 @@ function terminal(): Parser<Expression> {
         bind(charP("("), (_) =>
           bind(sum(), (exp) => bind(charP(")"), (_) => result(exp)))
         ),
-        integer()
+        either(fn(), integer())
       ),
       (term) => bind(whitespace(), (_) => result(term))
     )
@@ -114,6 +144,10 @@ export function evalExp(e: Expression): number {
       case "*":
         return evalExp(e.lhs) * evalExp(e.rhs);
     }
+  }
+
+  if (e instanceof FunctionInvocationExpression) {
+    return fns[e.name](evalExp(e.arg));
   }
 
   return 0;

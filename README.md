@@ -10,7 +10,10 @@ A simple math parser and evaluator
 - [ ] Floats
 - [x] Negative numbers
 - [x] Grouped expressions
-- [ ] Builtin math funcs
+- [x] Builtin math funcs
+  - sin
+  - cos
+  - abs
 - [ ] More operators
 - [x] REPL
 - [x] Evaluation
