@@ -6,6 +6,7 @@ import {
   many,
   Parser,
   result,
+  sepBy,
   stringP,
   whitespace,
 } from "https://raw.githubusercontent.com/fr3fou/djena/master/parse.ts";
@@ -25,7 +26,7 @@ class InfixExpression implements Expression {
 }
 
 class FunctionInvocationExpression implements Expression {
-  constructor(readonly name: Fn, readonly arg: Expression) {}
+  constructor(readonly name: Fn, readonly args: Expression[]) {}
   expressionNode(): void {}
 }
 
@@ -35,11 +36,12 @@ class Integer implements Expression {
 }
 
 type Operator = "+" | "-" | "*" | "/";
-type Fn = "sin" | "cos" | "abs";
-const fns: { [key in Fn]: (n: number) => number } = {
-  sin: Math.sin,
-  cos: Math.cos,
-  abs: Math.abs,
+type Fn = keyof typeof fns;
+const fns: Record<string, (...nums: number[]) => number> = {
+  sin: (x: number) => Math.sin(x),
+  cos: (x: number) => Math.cos(x),
+  abs: (x: number) => Math.abs(x),
+  pow: (x: number, y: number) => Math.pow(x, y),
 };
 
 function integer(): Parser<Integer> {
@@ -54,16 +56,22 @@ function integer(): Parser<Integer> {
 
 function fn(): Parser<FunctionInvocationExpression> {
   return bind(
-    either(stringP("sin"), either(stringP("cos"), stringP("abs"))) as Parser<
-      Fn
-    >,
+    either(
+      stringP("sin"),
+      either(stringP("cos"), either(stringP("abs"), stringP("pow")))
+    ) as Parser<Fn>,
     (name) =>
       bind(whitespace(), (_) =>
         bind(charP("("), (_) =>
-          bind(sum(), (exp) =>
-            bind(charP(")"), (_) =>
-              result(new FunctionInvocationExpression(name, exp))
-            )
+          bind(
+            sepBy(
+              bind(whitespace(), (_) => bind(charP(","), (_) => whitespace())),
+              sum()
+            ),
+            (exp) =>
+              bind(charP(")"), (_) =>
+                result(new FunctionInvocationExpression(name, exp))
+              )
           )
         )
       )
@@ -147,7 +155,14 @@ export function evalExp(e: Expression): number {
   }
 
   if (e instanceof FunctionInvocationExpression) {
-    return fns[e.name](evalExp(e.arg));
+    const args = e.args.map((v) => evalExp(v));
+    const fn = fns[e.name];
+    if (args.length !== fn.length) {
+      throw new Error(
+        `wrong number of args passed to ${e.name}, expected ${fn.length}, got ${args.length}`
+      );
+    }
+    return fns[e.name](...args);
   }
 
   return 0;
