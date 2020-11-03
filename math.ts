@@ -46,8 +46,13 @@ export function integer(): Parser<Integer> {
   return bind(many(digit()), (v) => result(new Integer(Number(v.join("")))));
 }
 
-function terminal(): Parser<Integer> {
-  return integer();
+function terminal(): Parser<Expression> {
+  return either(
+    bind(charP("("), (_) =>
+      bind(sum(), (exp) => bind(charP(")"), (_) => result(exp)))
+    ),
+    integer()
+  );
 }
 
 function product(): Parser<Expression> {

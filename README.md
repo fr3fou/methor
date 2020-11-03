@@ -9,7 +9,7 @@ A simple math parser and evaluator
 - [ ] Intersperse calls with whitespace eating
 - [ ] Floats
 - [ ] Negative numbers
-- [ ] Grouped expressions
+- [x] Grouped expressions
 - [ ] Builtin math funcs
 - [ ] More operators
 - [ ] REPL
