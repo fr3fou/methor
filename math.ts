@@ -175,9 +175,9 @@ export function evalExp(e: Expression): number {
   if (e instanceof FunctionInvocationExpression) {
     const args = e.args.map((v) => evalExp(v));
     const fn = fns[e.name];
-    if (args.length !== fn.length) {
+    if (args.length < fn.length) {
       throw new Error(
-        `wrong number of args passed to ${e.name}, expected ${fn.length}, got ${args.length}`
+        `not enough args passed to ${e.name}, expected ${fn.length}, got ${args.length}`
       );
     }
     return fns[e.name](...args);
