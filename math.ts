@@ -113,36 +113,22 @@ function terminal(): Parser<Expression> {
 function product(): Parser<Expression> {
   return either(
     bind(terminal(), (lhs) =>
-      bind(charP("*") as Parser<Operator>, (op) =>
+      bind(either(charP("*"), charP("/")) as Parser<Operator>, (op) =>
         bind(product(), (rhs) => result(new InfixExpression(op, lhs, rhs)))
       )
     ),
-    either(
-      bind(terminal(), (lhs) =>
-        bind(charP("/") as Parser<Operator>, (op) =>
-          bind(product(), (rhs) => result(new InfixExpression(op, lhs, rhs)))
-        )
-      ),
-      terminal()
-    )
+    terminal()
   );
 }
 
 function sum(): Parser<Expression> {
   return either(
     bind(product(), (lhs) =>
-      bind(charP("+") as Parser<Operator>, (op) =>
+      bind(either(charP("+"), charP("-")) as Parser<Operator>, (op) =>
         bind(sum(), (rhs) => result(new InfixExpression(op, lhs, rhs)))
       )
     ),
-    either(
-      bind(product(), (lhs) =>
-        bind(charP("-") as Parser<Operator>, (op) =>
-          bind(sum(), (rhs) => result(new InfixExpression(op, lhs, rhs)))
-        )
-      ),
-      product()
-    )
+    product()
   );
 }
 
