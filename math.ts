@@ -6,6 +6,7 @@ import {
   many,
   Parser,
   result,
+  whitespace,
 } from "https://raw.githubusercontent.com/fr3fou/djena/master/parse.ts";
 
 interface Expression {
@@ -34,11 +35,16 @@ function integer(): Parser<Integer> {
 }
 
 function terminal(): Parser<Expression> {
-  return either(
-    bind(charP("("), (_) =>
-      bind(sum(), (exp) => bind(charP(")"), (_) => result(exp)))
-    ),
-    integer()
+  return bind(whitespace(), (_) =>
+    bind(
+      either(
+        bind(charP("("), (_) =>
+          bind(sum(), (exp) => bind(charP(")"), (_) => result(exp)))
+        ),
+        integer()
+      ),
+      (term) => bind(whitespace(), (_) => result(term))
+    )
   );
 }
 
