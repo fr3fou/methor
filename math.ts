@@ -30,6 +30,11 @@ class FunctionInvocationExpression implements Expression {
   expressionNode(): void {}
 }
 
+class Constant implements Expression {
+  constructor(readonly name: Const) {}
+  expressionNode(): void {}
+}
+
 class Integer implements Expression {
   constructor(readonly value: number) {}
   expressionNode(): void {}
@@ -37,11 +42,18 @@ class Integer implements Expression {
 
 type Operator = "+" | "-" | "*" | "/";
 type Fn = keyof typeof fns;
+type Const = keyof typeof consts;
+
 const fns: Record<string, (...nums: number[]) => number> = {
   sin: (x: number) => Math.sin(x),
   cos: (x: number) => Math.cos(x),
   abs: (x: number) => Math.abs(x),
   pow: (x: number, y: number) => Math.pow(x, y),
+};
+
+const consts: { [key in string]: number } = {
+  PI: Math.PI,
+  TAU: Math.PI * 2,
 };
 
 function integer(): Parser<Integer> {
@@ -78,6 +90,12 @@ function fn(): Parser<FunctionInvocationExpression> {
   );
 }
 
+function constant(): Parser<Constant> {
+  return bind(either(stringP("TAU"), stringP("PI")), (name) =>
+    result(new Constant(name))
+  );
+}
+
 function terminal(): Parser<Expression> {
   return bind(whitespace(), (_) =>
     bind(
@@ -85,7 +103,7 @@ function terminal(): Parser<Expression> {
         bind(charP("("), (_) =>
           bind(sum(), (exp) => bind(charP(")"), (_) => result(exp)))
         ),
-        either(fn(), integer())
+        either(fn(), either(constant(), integer()))
       ),
       (term) => bind(whitespace(), (_) => result(term))
     )
@@ -163,6 +181,10 @@ export function evalExp(e: Expression): number {
       );
     }
     return fns[e.name](...args);
+  }
+
+  if (e instanceof Constant) {
+    return consts[e.name];
   }
 
   return 0;

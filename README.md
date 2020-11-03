@@ -16,7 +16,7 @@ A simple math parser and evaluator
   - [x] pow
 - [x] REPL
 - [x] Evaluation
+- [x] Constants
 - [ ] More operators
 - [ ] Binary operators
 - [ ] Floats
-- [ ] Constants
