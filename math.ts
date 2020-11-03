@@ -31,7 +31,13 @@ class Integer implements Expression {
 type Operator = "+" | "-" | "*" | "/";
 
 function integer(): Parser<Integer> {
-  return bind(many(digit()), (v) => result(new Integer(Number(v.join("")))));
+  return bind(
+    either(
+      bind(charP("-"), (m) => bind(many(digit()), (d) => result([m, ...d]))),
+      many(digit())
+    ),
+    (v) => result(new Integer(Number(v.join(""))))
+  );
 }
 
 function terminal(): Parser<Expression> {

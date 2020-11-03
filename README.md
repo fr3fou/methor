@@ -8,7 +8,7 @@ A simple math parser and evaluator
   - The deeper an operator parser is in the callstack, the higher precedence it has
 - [x] Intersperse calls with whitespace eating
 - [ ] Floats
-- [ ] Negative numbers
+- [x] Negative numbers
 - [x] Grouped expressions
 - [ ] Builtin math funcs
 - [ ] More operators
