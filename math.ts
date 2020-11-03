@@ -46,37 +46,50 @@ export function integer(): Parser<Integer> {
   return bind(many(digit()), (v) => result(new Integer(Number(v.join("")))));
 }
 
-export function operator(): Parser<Operator> {
-  return either(
-    charP("+"),
-    either(charP("-"), either(charP("*"), charP("/")))
-  ) as Parser<Operator>;
+function terminal(): Parser<Integer> {
+  return integer();
 }
 
-export function infixExpression(lhs: Expression): Parser<InfixExpression> {
-  return bind(operator(), (op) =>
-    bind(expression(precedences[op]), (rhs) =>
-      result(new InfixExpression(op, lhs, rhs))
+function product(): Parser<Expression> {
+  return either(
+    bind(terminal(), (lhs) =>
+      bind(charP("*") as Parser<Operator>, (op) =>
+        bind(product(), (rhs) => result(new InfixExpression(op, lhs, rhs)))
+      )
+    ),
+    either(
+      bind(terminal(), (lhs) =>
+        bind(charP("/") as Parser<Operator>, (op) =>
+          bind(product(), (rhs) => result(new InfixExpression(op, lhs, rhs)))
+        )
+      ),
+      terminal()
     )
   );
 }
 
-export function expression(curr: Precedence): Parser<Expression> {
+function sum(): Parser<Expression> {
   return either(
-    bind(integer(), (lhs) => {
-      return (input: string): [Expression, string][] => {
-        const op = operator();
-        const out = op(input);
-        if (out.length === 0) {
-          return [];
-        }
-        if (curr < precedences[out[0][0]]) {
-          return infixExpression(lhs)(input);
-        }
-
-        return [[lhs, input]];
-      };
-    }),
-    integer()
+    bind(product(), (lhs) =>
+      bind(charP("+") as Parser<Operator>, (op) =>
+        bind(sum(), (rhs) => result(new InfixExpression(op, lhs, rhs)))
+      )
+    ),
+    either(
+      bind(product(), (lhs) =>
+        bind(charP("-") as Parser<Operator>, (op) =>
+          bind(sum(), (rhs) => result(new InfixExpression(op, lhs, rhs)))
+        )
+      ),
+      product()
+    )
   );
+}
+
+export function expression(): Parser<Expression> {
+  return bind(sum(), (exp) => bind(EOF(), (_) => result(exp)));
+}
+
+export function EOF(): Parser<boolean> {
+  return (input) => (input === "" ? [[true, input]] : []);
 }
