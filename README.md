@@ -12,6 +12,6 @@ A simple math parser and evaluator
 - [x] Grouped expressions
 - [ ] Builtin math funcs
 - [ ] More operators
-- [ ] REPL
+- [x] REPL
 - [x] Evaluation
 - [ ] Binary operators
