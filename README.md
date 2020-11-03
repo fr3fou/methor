@@ -4,7 +4,8 @@ A simple math parser and evaluator
 
 ## TODO
 
-- [ ] Precedence
+- [x] Precedence
+  - The deeper an operator parser is in the callstack, the higher precedence it has
 - [ ] Floats
 - [ ] Negative numbers
 - [ ] Grouped expressions
