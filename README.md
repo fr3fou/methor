@@ -17,6 +17,8 @@ A simple math parser and evaluator
 - [x] REPL
 - [x] Evaluation
 - [x] Constants
+- [ ] Fix left/right associativity
+  - `50/2*2+10` should evaluate to 60, not 22.5
 - [ ] More operators
 - [ ] Floats
 - [ ] Unary operators
