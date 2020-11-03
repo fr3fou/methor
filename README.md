@@ -18,5 +18,5 @@ A simple math parser and evaluator
 - [x] Evaluation
 - [x] Constants
 - [ ] More operators
-- [ ] Binary operators
 - [ ] Floats
+- [ ] Unary operators
