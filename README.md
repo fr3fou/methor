@@ -11,9 +11,10 @@ A simple math parser and evaluator
 - [x] Negative numbers
 - [x] Grouped expressions
 - [x] Builtin math funcs
-  - sin
-  - cos
-  - abs
+  - [x] sin
+  - [x] cos
+  - [x] abs
+  - [x] pow
 - [ ] More operators
 - [x] REPL
 - [x] Evaluation
