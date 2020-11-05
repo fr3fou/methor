@@ -68,10 +68,7 @@ function integer(): Parser<Integer> {
 
 function fn(): Parser<FunctionInvocationExpression> {
   return bind(
-    either(
-      stringP("sin"),
-      either(stringP("cos"), either(stringP("abs"), stringP("pow")))
-    ) as Parser<Fn>,
+    either(...Object.keys(fns).map((fn) => stringP(fn))) as Parser<Fn>,
     (name) =>
       bind(whitespace(), (_) =>
         bind(charP("("), (_) =>
@@ -91,7 +88,7 @@ function fn(): Parser<FunctionInvocationExpression> {
 }
 
 function constant(): Parser<Constant> {
-  return bind(either(stringP("TAU"), stringP("PI")), (name) =>
+  return bind(either(...Object.keys(consts).map((cn) => stringP(cn))), (name) =>
     result(new Constant(name))
   );
 }
@@ -103,7 +100,9 @@ function terminal(): Parser<Expression> {
         bind(charP("("), (_) =>
           bind(sum(), (exp) => bind(charP(")"), (_) => result(exp)))
         ),
-        either(fn(), either(constant(), integer()))
+        fn(),
+        constant(),
+        integer()
       ),
       (term) => bind(whitespace(), (_) => result(term))
     )
