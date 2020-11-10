@@ -109,32 +109,40 @@ function terminal(): Parser<Expression> {
 }
 
 function product(): Parser<Expression> {
-  return bind(
-    bind(terminal(), (lhs) =>
+  return bind(terminal(), (lhs) =>
+    bind(
       many(
         bind(either(charP("*"), charP("/")) as Parser<Operator>, (op) =>
-          bind(product(), (rhs) => result(new InfixExpression(op, lhs, rhs)))
+          bind(terminal(), (rhs) => result({ op, rhs }))
         )
-      )
-    ),
-    ([first, ...rest]) =>
-      result(
-        rest.reduce(
-          (acc, val) => new InfixExpression(val.operator, acc, val),
-          first
+      ),
+      (vs) =>
+        result(
+          vs.reduce(
+            (acc, val) => new InfixExpression(val.op, acc, val.rhs),
+            lhs
+          )
         )
-      )
+    )
   );
 }
 
 function sum(): Parser<Expression> {
-  return either(
-    bind(product(), (lhs) =>
-      bind(either(charP("+"), charP("-")) as Parser<Operator>, (op) =>
-        bind(sum(), (rhs) => result(new InfixExpression(op, lhs, rhs)))
-      )
-    ),
-    product()
+  return bind(product(), (lhs) =>
+    bind(
+      many(
+        bind(either(charP("+"), charP("-")) as Parser<Operator>, (op) =>
+          bind(product(), (rhs) => result({ op, rhs }))
+        )
+      ),
+      (vs) =>
+        result(
+          vs.reduce(
+            (acc, val) => new InfixExpression(val.op, acc, val.rhs),
+            lhs
+          )
+        )
+    )
   );
 }
 
