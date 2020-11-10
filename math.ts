@@ -86,7 +86,6 @@ function fn(): Parser<FunctionInvocationExpression> {
       )
   );
 }
-
 function constant(): Parser<Constant> {
   return bind(either(...Object.keys(consts).map((cn) => stringP(cn))), (name) =>
     result(new Constant(name))
@@ -110,24 +109,40 @@ function terminal(): Parser<Expression> {
 }
 
 function product(): Parser<Expression> {
-  return either(
-    bind(terminal(), (lhs) =>
-      bind(either(charP("*"), charP("/")) as Parser<Operator>, (op) =>
-        bind(product(), (rhs) => result(new InfixExpression(op, lhs, rhs)))
-      )
-    ),
-    terminal()
+  return bind(terminal(), (lhs) =>
+    bind(
+      many(
+        bind(either(charP("*"), charP("/")) as Parser<Operator>, (op) =>
+          bind(terminal(), (rhs) => result({ op, rhs }))
+        )
+      ),
+      (vs) =>
+        result(
+          vs.reduce(
+            (acc, val) => new InfixExpression(val.op, acc, val.rhs),
+            lhs
+          )
+        )
+    )
   );
 }
 
 function sum(): Parser<Expression> {
-  return either(
-    bind(product(), (lhs) =>
-      bind(either(charP("+"), charP("-")) as Parser<Operator>, (op) =>
-        bind(sum(), (rhs) => result(new InfixExpression(op, lhs, rhs)))
-      )
-    ),
-    product()
+  return bind(product(), (lhs) =>
+    bind(
+      many(
+        bind(either(charP("+"), charP("-")) as Parser<Operator>, (op) =>
+          bind(product(), (rhs) => result({ op, rhs }))
+        )
+      ),
+      (vs) =>
+        result(
+          vs.reduce(
+            (acc, val) => new InfixExpression(val.op, acc, val.rhs),
+            lhs
+          )
+        )
+    )
   );
 }
 
