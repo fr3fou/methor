@@ -5,18 +5,15 @@ on: [push, pull_request]
 jobs:
   test:
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        deno-version: [1.2.2, 1.3.0]
 
     steps:
       - name: Git Checkout Deno Module
         uses: actions/checkout@v2
 
-      - name: Use Deno Version ${{ matrix.deno-version }}
+      - name: Setting up Deno
         uses: denolib/setup-deno@v2
         with:
-          deno-version: ${{ matrix.deno-version }}
+          deno-version: 1.4.6
 
       - name: Lint Deno Module
         run: deno fmt --check
