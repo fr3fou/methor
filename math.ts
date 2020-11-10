@@ -19,7 +19,7 @@ class InfixExpression implements Expression {
   constructor(
     readonly operator: Operator,
     readonly lhs: Expression,
-    readonly rhs: Expression
+    readonly rhs: Expression,
   ) {}
 
   expressionNode() {}
@@ -60,9 +60,9 @@ function integer(): Parser<Integer> {
   return bind(
     either(
       bind(charP("-"), (m) => bind(many(digit()), (d) => result([m, ...d]))),
-      many(digit())
+      many(digit()),
     ),
-    (v) => result(new Integer(Number(v.join(""))))
+    (v) => result(new Integer(Number(v.join("")))),
   );
 }
 
@@ -75,20 +75,18 @@ function fn(): Parser<FunctionInvocationExpression> {
           bind(
             sepBy(
               bind(whitespace(), (_) => bind(charP(","), (_) => whitespace())),
-              sum()
+              sum(),
             ),
             (exp) =>
               bind(charP(")"), (_) =>
-                result(new FunctionInvocationExpression(name, exp))
-              )
-          )
-        )
-      )
+                result(new FunctionInvocationExpression(name, exp))),
+          ))),
   );
 }
 function constant(): Parser<Constant> {
-  return bind(either(...Object.keys(consts).map((cn) => stringP(cn))), (name) =>
-    result(new Constant(name))
+  return bind(
+    either(...Object.keys(consts).map((cn) => stringP(cn))),
+    (name) => result(new Constant(name)),
   );
 }
 
@@ -97,15 +95,14 @@ function terminal(): Parser<Expression> {
     bind(
       either(
         bind(charP("("), (_) =>
-          bind(sum(), (exp) => bind(charP(")"), (_) => result(exp)))
-        ),
+          bind(sum(), (exp) => bind(charP(")"), (_) => result(exp)))),
         fn(),
         constant(),
-        integer()
+        integer(),
       ),
-      (term) => bind(whitespace(), (_) => result(term))
-    )
-  );
+      (term) =>
+        bind(whitespace(), (_) => result(term)),
+    ));
 }
 
 function product(): Parser<Expression> {
@@ -113,18 +110,17 @@ function product(): Parser<Expression> {
     bind(
       many(
         bind(either(charP("*"), charP("/")) as Parser<Operator>, (op) =>
-          bind(terminal(), (rhs) => result({ op, rhs }))
-        )
+          bind(terminal(), (rhs) => result({ op, rhs }))),
       ),
       (vs) =>
         result(
           vs.reduce(
-            (acc, val) => new InfixExpression(val.op, acc, val.rhs),
-            lhs
-          )
-        )
-    )
-  );
+            (acc, val) =>
+              new InfixExpression(val.op, acc, val.rhs),
+            lhs,
+          ),
+        ),
+    ));
 }
 
 function sum(): Parser<Expression> {
@@ -132,18 +128,17 @@ function sum(): Parser<Expression> {
     bind(
       many(
         bind(either(charP("+"), charP("-")) as Parser<Operator>, (op) =>
-          bind(product(), (rhs) => result({ op, rhs }))
-        )
+          bind(product(), (rhs) => result({ op, rhs }))),
       ),
       (vs) =>
         result(
           vs.reduce(
-            (acc, val) => new InfixExpression(val.op, acc, val.rhs),
-            lhs
-          )
-        )
-    )
-  );
+            (acc, val) =>
+              new InfixExpression(val.op, acc, val.rhs),
+            lhs,
+          ),
+        ),
+    ));
 }
 
 export function expression(): Parser<Expression> {
@@ -177,7 +172,7 @@ export function evalExp(e: Expression): number {
     const fn = fns[e.name];
     if (args.length < fn.length) {
       throw new Error(
-        `not enough args passed to ${e.name}, expected ${fn.length}, got ${args.length}`
+        `not enough args passed to ${e.name}, expected ${fn.length}, got ${args.length}`,
       );
     }
     return fns[e.name](...args);
