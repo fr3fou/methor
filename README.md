@@ -2,6 +2,8 @@
 
 A simple math parser and evaluator
 
+![](./demo.png)
+
 ## TODO
 
 - [x] Precedence
@@ -19,7 +21,7 @@ A simple math parser and evaluator
 - [x] Constants
 - [x] Fix left/right associativity
   - `50/2*2+10` should evaluate to 60, not 22.5
-- [ ] Tests
+- [x] Tests
 - [ ] More operators
 - [ ] Floats
 - [ ] Unary operators
