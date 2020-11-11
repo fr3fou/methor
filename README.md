@@ -4,6 +4,14 @@ A simple math parser and evaluator
 
 ![](./demo.png)
 
+## Usage
+
+```bash
+$ deno run ./main.ts repl
+# or
+$ deno run ./main.ts 5+3
+```
+
 ## TODO
 
 - [x] Precedence
