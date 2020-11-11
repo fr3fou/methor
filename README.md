@@ -27,8 +27,10 @@ $ deno run ./main.ts 5+3
 - [x] REPL
 - [x] Evaluation
 - [x] Constants
+  - [x] PI
+  - [x] TAU
 - [x] Fix left/right associativity
-  - `50/2*2+10` should evaluate to 60, not 22.5
+  - `50/2*2+10` should evaluate to `60`, not `22.5`
 - [x] Tests
 - [ ] More operators
 - [ ] Floats
