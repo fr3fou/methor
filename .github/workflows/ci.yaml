@@ -19,7 +19,7 @@ jobs:
         run: deno fmt --check
 
       - name: Build Deno Module
-        run: deno run --reload main.ts
+        run: deno run --reload main.ts 1+2
 
       - name: Test Deno Module
         run: deno test --allow-none
