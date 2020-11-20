@@ -18,6 +18,18 @@ const table = [
   { input: "3 * 3 * 3 + 10", expected: 37 },
   { input: "3 * (3 * 3) + 10", expected: 37 },
   { input: "(5 + 10 * 2 + 15 / 3) * 2 + -10", expected: 50 },
+  { input: "-1 < 1", expected: true },
+  { input: "5 > 2", expected: true },
+  { input: "1 < 2", expected: true },
+  { input: "6 > 7", expected: false },
+  { input: "7 < 3", expected: false },
+  { input: "5 + 3 > 2", expected: true },
+  { input: "1 < 3 - 1", expected: true },
+  { input: "6 + 9 > -7", expected: true },
+  { input: "7 < 3", expected: false },
+  { input: "2 * 3 < 3", expected: false },
+  { input: "2 * 3 > 3", expected: true },
+  { input: "100 / 3 > 3 * 11", expected: true },
 ];
 
 const mathParser = expression();
