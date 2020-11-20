@@ -40,7 +40,7 @@ class Integer implements Expression {
   expressionNode(): void {}
 }
 
-type Operator = "+" | "-" | "*" | "/";
+type Operator = "+" | "-" | "*" | "/" | ">" | "<";
 type Fn = keyof typeof fns;
 type Const = keyof typeof consts;
 
@@ -141,41 +141,81 @@ function sum(): Parser<Expression> {
     ));
 }
 
+function comparison(): Parser<Expression> {
+  return bind(sum(), (lhs) =>
+    bind(
+      many(
+        bind(either(charP(">"), charP("<")) as Parser<Operator>, (op) =>
+          bind(sum(), (rhs) => result({ op, rhs }))),
+      ),
+      (vs) =>
+        result(
+          vs.reduce(
+            (acc, val) =>
+              new InfixExpression(val.op, acc, val.rhs),
+            lhs,
+          ),
+        ),
+    ));
+}
+
 export function expression(): Parser<Expression> {
-  return bind(sum(), (exp) => bind(EOF(), (_) => result(exp)));
+  return bind(comparison(), (exp) => bind(EOF(), (_) => result(exp)));
 }
 
 function EOF(): Parser<boolean> {
   return (input) => (input === "" ? [[true, input]] : []);
 }
 
-export function evalExp(e: Expression): number {
+export function evalExp(e: Expression): number | boolean {
   if (e instanceof Integer) {
     return e.value;
   }
 
   if (e instanceof InfixExpression) {
+    let rhs = evalExp(e.rhs);
+    if (typeof rhs === "boolean") {
+      rhs = Number(rhs);
+    }
+
+    let lhs = evalExp(e.lhs);
+    if (typeof lhs === "boolean") {
+      lhs = Number(lhs);
+    }
+
     switch (e.operator) {
-      case "+":
-        return evalExp(e.lhs) + evalExp(e.rhs);
-      case "-":
-        return evalExp(e.lhs) - evalExp(e.rhs);
-      case "/":
-        return evalExp(e.lhs) / evalExp(e.rhs);
       case "*":
-        return evalExp(e.lhs) * evalExp(e.rhs);
+        return lhs * rhs;
+      case "+":
+        return lhs + rhs;
+      case "-":
+        return lhs - rhs;
+      case "/":
+        return lhs / rhs;
+      case ">":
+        return lhs > rhs;
+      case "<":
+        return lhs < rhs;
     }
   }
 
   if (e instanceof FunctionInvocationExpression) {
-    const args = e.args.map((v) => evalExp(v));
+    const args = e.args.map((v) => {
+      const val = evalExp(v);
+      if (typeof val === "number") {
+        return val;
+      }
+
+      return Number(val);
+    });
+
     const fn = fns[e.name];
     if (args.length < fn.length) {
       throw new Error(
         `not enough args passed to ${e.name}, expected ${fn.length}, got ${args.length}`,
       );
     }
-    return fns[e.name](...args);
+    return fn(...args);
   }
 
   if (e instanceof Constant) {
